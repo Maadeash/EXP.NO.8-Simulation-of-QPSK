@@ -106,8 +106,6 @@ plt.tight_layout()
 plt.show()
 
 
-
-
 # OUTPUT
 ![QPSK OUTPUT](https://github.com/user-attachments/assets/f579cdd8-1853-4667-8645-7874657e2096)
 
