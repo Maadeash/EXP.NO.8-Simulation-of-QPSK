@@ -38,88 +38,77 @@ Draw the Signal
 ```
 
 # PROGRAM
-```
 import numpy as np
 import matplotlib.pyplot as plt
-
-# Parameters
-num_symbols = 10          # Number of QPSK symbols
-T = 1.0                   # Symbol period (s)
-fs = 100.0                # Sampling frequency (Hz)
-t = np.arange(0, T, 1/fs) # Time vector for one symbol
-
-# Generate random bit sequence
-bits = np.random.randint(0, 2, num_symbols * 2)  # 2 bits per QPSK symbol
-symbols = 2 * bits[0::2] + bits[1::2]            # Map bits to QPSK symbols (00, 01, 10, 11 → 0, 1, 2, 3)
-
-# QPSK phase mapping
-symbol_phases = {
-    0: 0,
-    1: np.pi / 2,
-    2: np.pi,
-    3: 3 * np.pi / 2
-}
-
-# Initialize QPSK signal and symbol time markers
-qpsk_signal = np.array([])
+num_symbols = 10 # Number of QPSK symbols (each with 2 bits)
+T = 1.0 # Symbol period
+fs = 100.0 # Sampling frequency
+t = np.arange(0, T, 1/fs)
+# Generate 2 bits per symbol
+bits = np.random.randint(0, 2, num_symbols * 2)
+# Separate into I (cosine) and Q (sine) bits
+i_bits = bits[0::2] # Even-indexed bits
+q_bits = bits[1::2] # Odd-indexed bits
+# Map bits: 0 → -1, 1 → +1
+i_values = 2 * i_bits - 1
+q_values = 2 * q_bits - 1
+# Initialize signal arrays
+i_signal = np.array([])
+q_signal = np.array([])
+combined_signal = np.array([])
 symbol_times = []
 
-# Generate QPSK-modulated signal
-for i, symbol in enumerate(symbols):
-    phase = symbol_phases[symbol]
-    symbol_time = i * T
-    qpsk_segment = np.cos(2 * np.pi * t / T + phase) + 1j * np.sin(2 * np.pi * t / T + phase)
-    qpsk_signal = np.concatenate((qpsk_signal, qpsk_segment))
-    symbol_times.append(symbol_time)
-
-# Time vector for entire signal
+for i in range(num_symbols):
+    # The following lines were not indented correctly and have been fixed
+    i_carrier = i_values[i] * np.cos(2 * np.pi * t / T)
+    q_carrier = q_values[i] * np.sin(2 * np.pi * t / T)
+    symbol_times.append(i * T)
+    i_signal = np.concatenate((i_signal, i_carrier))
+    q_signal = np.concatenate((q_signal, q_carrier))
+    combined_signal = np.concatenate((combined_signal, i_carrier + q_carrier))
 t_total = np.arange(0, num_symbols * T, 1/fs)
-
 # Plotting
-plt.figure(figsize=(14, 12))
-
-# In-phase component
+plt.figure(figsize=(14, 9))
+# In-phase (cosine) component
 plt.subplot(3, 1, 1)
-plt.plot(t_total, np.real(qpsk_signal), label='In-phase')
+plt.plot(t_total, i_signal, label='In-phase (cos)', color='blue')
 for i, symbol_time in enumerate(symbol_times):
     plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
-    plt.text(symbol_time + T/4, 0.5, f'{symbols[i]:02b}', fontsize=12, color='blue')
-plt.title('QPSK Signal - In-phase Component with Symbols')
-plt.xlabel('Time [s]')
+    plt.text(symbol_time + T/4, 0.8, f'{i_bits[i]}', fontsize=12, color='black')
+plt.title('In-phase Component (Cosine) - One Bit per Symbol')
+plt.xlabel('Time')
 plt.ylabel('Amplitude')
 plt.grid(True)
 plt.legend()
-
-# Quadrature component
+# Quadrature (sine) component
 plt.subplot(3, 1, 2)
-plt.plot(t_total, np.imag(qpsk_signal), label='Quadrature', color='orange')
+plt.plot(t_total, q_signal, label='Quadrature (sin)', color='orange')
 for i, symbol_time in enumerate(symbol_times):
     plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
-    plt.text(symbol_time + T/4, 0.5, f'{symbols[i]:02b}', fontsize=12, color='blue')
-plt.title('QPSK Signal - Quadrature Component with Symbols')
-plt.xlabel('Time [s]')
+    plt.text(symbol_time + T/4, 0.8, f'{q_bits[i]}', fontsize=12, color='black')
+plt.title('Quadrature Component (Sine) - One Bit per Symbol')
+plt.xlabel('Time')
 plt.ylabel('Amplitude')
 plt.grid(True)
 plt.legend()
-
-# Resultant QPSK waveform (real part only)
+# Combined QPSK waveform
 plt.subplot(3, 1, 3)
-plt.plot(t_total, np.real(qpsk_signal), label='Resultant QPSK Waveform', color='green')
+plt.plot(t_total, combined_signal, label='QPSK Signal = I + Q', color='green')
 for i, symbol_time in enumerate(symbol_times):
     plt.axvline(symbol_time, color='red', linestyle='--', linewidth=0.5)
-    plt.text(symbol_time + T/4, 0.5, f'{symbols[i]:02b}', fontsize=12, color='blue')
-plt.title('Resultant QPSK Waveform')
-plt.xlabel('Time [s]')
+    plt.text(symbol_time + T/4, 0.8, f'{i_bits[i]}{q_bits[i]}', fontsize=12, color='black')
+plt.title('Combined QPSK Waveform')
+plt.xlabel('Time')
 plt.ylabel('Amplitude')
 plt.grid(True)
 plt.legend()
-
 plt.tight_layout()
 plt.show()
-```
+
 
 # OUTPUT
-![image](https://github.com/user-attachments/assets/860e6961-fee8-40fa-829d-b85bb712b32c)
+![QPSK OUTPUT](https://github.com/user-attachments/assets/f579cdd8-1853-4667-8645-7874657e2096)
+
 
  
 # RESULT / CONCLUSIONS
